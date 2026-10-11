@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { doc, setDoc } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
+import { doc, setDoc } from "../compat/firestore";
+import { httpsCallable } from "../compat/functions";
 import { auth, db, functions } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { useBreakManagement } from "../hooks/useBreakManagement";
