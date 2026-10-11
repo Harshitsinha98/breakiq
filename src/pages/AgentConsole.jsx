@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { doc, setDoc } from "../compat/firestore";
+import { supabase } from "../supabase";
 import { httpsCallable } from "../compat/functions";
 import { auth, db, functions } from "../firebase";
 import { useAuth } from "../context/AuthContext";
@@ -671,9 +671,8 @@ export function WorkModeToggle({ profile }) {
     setUpdating(true);
     
     try {
-      const targetUid = profile.uid || profile.id;
-      await setDoc(doc(db, "users", targetUid), { workMode: newMode }, { merge: true });
-      await setDoc(doc(db, "presence", targetUid), { workMode: newMode }, { merge: true });
+      const { error } = await supabase.rpc("set_work_mode", { p_mode: newMode });
+      if (error) throw error;
     } catch(e) { 
       setMode(oldMode); 
       console.error("Toggle Failed:", e);
