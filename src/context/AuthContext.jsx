@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "../compat/auth";
+import { doc, onSnapshot, setDoc, serverTimestamp } from "../compat/firestore";
+import { httpsCallable } from "../compat/functions";
 import { auth, db, functions, ORG_DOMAIN } from "../firebase";
 
 const AuthContext = createContext(null);
