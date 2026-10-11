@@ -106,12 +106,7 @@ export default function LoginPage() {
         </div>
       </main>
 
-      <footer className="relative z-10 py-6 text-center animate-rise delay-2">
-        <p className="text-xs font-bold text-slate-400 tracking-wide">
-          Made with <span className="text-rose-500 inline-block glow-pulse">❤️</span> by <strong className="text-slate-600 font-black">Harshit Sinha</strong>
-        </p>
-      </footer>
-      
+
     </div>
   );
 }
