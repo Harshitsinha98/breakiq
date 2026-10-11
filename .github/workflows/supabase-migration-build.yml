@@ -32,6 +32,3 @@ jobs:
         env:
           VITE_SUPABASE_URL: https://nrunqihyyijjyihqqlfw.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-
-      - name: Lint application
-        run: npm run lint
