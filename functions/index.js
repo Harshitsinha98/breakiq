@@ -1,10 +1,14 @@
 const { setGlobalOptions } = require("firebase-functions/v2");
+const { defineSecret } = require("firebase-functions/params");
+
+const WHATSAPP_TOKEN = defineSecret("WHATSAPP_TOKEN");
 
 setGlobalOptions({
   memory: "256MiB",
   cpu: 0.25,
   maxInstances: 1,
-  timeoutSeconds: 60
+  timeoutSeconds: 60,
+  secrets: [WHATSAPP_TOKEN]
 });
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
@@ -19,7 +23,7 @@ const Timestamp = admin.firestore.Timestamp;
 
 const ORG_DOMAIN = "breakapp.internal";
 const WHATSAPP_GATEWAY_URL = "https://api.breakiq.in/send-message"; 
-const WHATSAPP_TOKEN = "ARES_SECRET_WA_KEY_2026";
+
 
 const DEFAULT_SETTINGS = {
   shiftDurationHours: 9, 
@@ -39,6 +43,12 @@ const DEFAULT_SETTINGS = {
 async function sendWhatsAppAlert(toPhone, messageText) {
   if (!toPhone || !messageText) return false;
 
+  const token = WHATSAPP_TOKEN.value();
+  if (!token) {
+    console.error("WHATSAPP_TOKEN secret is not configured.");
+    return false;
+  }
+
   let formattedPhone = toPhone.trim().replace(/[+\s-]/g, "");
   if (!formattedPhone.startsWith("91") && formattedPhone.length === 10) {
     formattedPhone = "91" + formattedPhone;
@@ -48,7 +58,7 @@ async function sendWhatsAppAlert(toPhone, messageText) {
 
   try {
     const response = await axios.post(WHATSAPP_GATEWAY_URL, {
-      token: WHATSAPP_TOKEN,
+      token,
       phone: formattedPhone,
       message: messageText
     }, {
