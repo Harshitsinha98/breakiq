@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, doc, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, where } from "../compat/firestore";
 import { db } from "../firebase";
 import { DEFAULT_SETTINGS } from "../utils/constants";
 
