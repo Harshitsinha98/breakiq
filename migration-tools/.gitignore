@@ -1,0 +1,9 @@
+.env
+.env.*
+!*.example
+firebase-service.json
+supabase-service.json
+service-account*.json
+users.json
+*.dump
+*.backup
