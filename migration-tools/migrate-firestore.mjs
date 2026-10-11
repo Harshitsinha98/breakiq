@@ -324,7 +324,6 @@ async function main() {
     };
   }).filter(Boolean);
 
-  const reportKnown = new Set(["uid","employeeId","project","reportType","type","payload","createdAt"]);
   const reports = reportDocs.map(({ id, data }) => {
     const legacyUid = data.uid || null;
     return {
@@ -363,6 +362,7 @@ async function main() {
 
   const counterRows = [];
   const maxEmployeeSeq = { AGT: 0, SUP: 0, ADM: 0 };
+  let legacyQueueSeq = 0;
   for (const p of profiles) {
     const match = /^(AGT|SUP|ADM)-(\d+)$/.exec(p.employee_id || "");
     if (match) maxEmployeeSeq[match[1]] = Math.max(maxEmployeeSeq[match[1]], Number(match[2]));
@@ -373,6 +373,8 @@ async function main() {
         const value = Number(d.data[prefix] || 0);
         if (Number.isFinite(value)) maxEmployeeSeq[prefix] = Math.max(maxEmployeeSeq[prefix], value);
       }
+    } else if (d.id === "queueSeq") {
+      legacyQueueSeq = Math.max(legacyQueueSeq, Number(d.data.value || 0));
     }
   }
   for (const [prefix,value] of Object.entries(maxEmployeeSeq)) {
@@ -380,7 +382,7 @@ async function main() {
   }
   for (const project of projects) {
     const maxQueue = breaks.filter((b) => b.project_id === project.id).reduce((max,b)=>Math.max(max,Number(b.queue_seq||0)),0);
-    counterRows.push({ project_id: project.id, counter_key: "queueSeq", values: { value: maxQueue }, updated_at: nowIso() });
+    counterRows.push({ project_id: project.id, counter_key: "queueSeq", values: { value: Math.max(maxQueue, legacyQueueSeq) }, updated_at: nowIso() });
   }
 
   const plan = [
