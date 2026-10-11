@@ -225,6 +225,26 @@ async function main() {
     extra: { ...extras(data, settingsKnown), hasSettingsOverride: true },
   }));
 
+  // The legacy break_settings/config doc is a global fallback in the Firebase code.
+  // Copy it to GENERAL only if the explicit project_settings/GENERAL doc is absent.
+  if (legacySettings && !projectSettings.some((item) => item.project_id === "GENERAL")) {
+    projectSettings.push({
+      project_id: "GENERAL",
+      shift_duration_hours: Number(legacySettings.shiftDurationHours ?? 9),
+      meal_break_min: Number(legacySettings.mealBreakMin ?? 40),
+      short_break_min: Number(legacySettings.shortBreakMin ?? 20),
+      lockout_start_min: Number(legacySettings.lockoutStartMin ?? 60),
+      lockout_end_min: Number(legacySettings.lockoutEndMin ?? 60),
+      max_concurrent_breaks: Number(legacySettings.maxConcurrentBreaks ?? 2),
+      alert_mode: String(legacySettings.alertMode || "INDIVIDUAL"),
+      supervisor_broadcast_numbers: plain(legacySettings.supervisorBroadcastNumbers || []),
+      emergency_lockout: legacySettings.emergencyLockout === true,
+      emergency_reason: legacySettings.emergencyReason || null,
+      updated_at: iso(legacySettings.updatedAt, nowIso()),
+      extra: { hasSettingsOverride: true, migratedFromLegacyBreakSettings: true },
+    });
+  }
+
   const appSettings = legacySettings ? [{
     id: "break_settings/config",
     settings: legacySettings,
