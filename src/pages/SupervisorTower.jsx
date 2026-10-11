@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { httpsCallable } from "firebase/functions";
+import { httpsCallable } from "../compat/functions";
 import { auth, functions } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { useFloorData } from "../hooks/useFloorData";
