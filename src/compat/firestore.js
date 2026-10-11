@@ -266,10 +266,19 @@ export function getDocs(ref) {
   return read(ref);
 }
 
+export function getDoc(ref) {
+  return read(ref);
+}
+
 export async function setDoc(ref, value, options = {}) {
   const data = toDbValue(value || {});
   if (ref.table === "presence") {
-    const { error } = await supabase.rpc("touch_presence");
+    const rpcName = data.status === "ONLINE" || data.status === "OFFLINE"
+      ? "set_presence_status"
+      : "touch_presence";
+    const { error } = rpcName === "set_presence_status"
+      ? await supabase.rpc(rpcName, { p_status: data.status })
+      : await supabase.rpc(rpcName);
     if (error) throw error;
     return { id: ref.id };
   }
