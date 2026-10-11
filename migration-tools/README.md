@@ -1,48 +1,52 @@
-# BreakIQ Firestore → Supabase Import Utility
+# Firestore → Supabase Import Utility
 
-This utility runs locally. It reads existing Firebase/Firestore data and upserts normalized rows into the BreakIQ Supabase project.
+This local utility reads the existing BreakIQ Firestore project and upserts normalized rows into the target Supabase project. It is not used by the browser app.
 
 ## Requirements
 
 - Node.js 20+
-- Read-only Firebase Admin credentials for the existing Firebase project
-- A Supabase service-role key kept only on your local machine
-- Firebase Auth users already imported to Supabase Auth using https://supabase.com/docs/guides/platform/migrating-to-supabase/firebase-auth
+- Firebase Admin credentials with access to read the legacy Firestore project
+- Supabase service-role key, stored only locally
+- Existing Firebase Auth users imported to Supabase Auth using the official guide: https://supabase.com/docs/guides/platform/migrating-to-supabase/firebase-auth
 
-## Setup on macOS/Linux
+## Configure
 
-From this directory:
+```bash
+npm install
+cp .env.example .env
+```
 
-    npm install
-    cp .env.example .env
+Edit `.env` locally:
 
-Edit .env locally:
+- `GOOGLE_APPLICATION_CREDENTIALS`: absolute path to a Firebase service-account JSON file.
+- `FIREBASE_PROJECT_ID`: existing project, normally `erp-break-system-fda79`.
+- `SUPABASE_URL`: target Supabase project URL.
+- `SUPABASE_SERVICE_ROLE_KEY`: target project's service-role secret.
 
-- GOOGLE_APPLICATION_CREDENTIALS: absolute path to Firebase service-account JSON
-- FIREBASE_PROJECT_ID: existing Firebase project (default erp-break-system-fda79)
-- SUPABASE_URL: BreakIQ Supabase URL
-- SUPABASE_SERVICE_ROLE_KEY: Supabase service-role key
+Load variables and run a dry run:
 
-Load the environment and run a dry run (no database writes):
+```bash
+set -a
+source .env
+set +a
+npm run migrate:firestore
+```
 
-    set -a
-    source .env
-    set +a
-    npm run migrate:firestore
-
-The importer lists planned row counts and stops before writing if it cannot match every Firestore user by the internal email convention <employeeId lowercased>@breakapp.internal.
+The dry run makes **no database writes**. It reports planned row counts and stops if a Firebase profile cannot be matched with a Supabase Auth user using `<employeeId lowercased>@breakapp.internal`.
 
 ## Apply
 
-After verifying the dry-run output and taking a fresh Firebase export:
+Only after reviewing the dry-run output and taking a fresh Firebase export:
 
-    npm run migrate:firestore -- --apply
+```bash
+npm run migrate:firestore -- --apply
+```
 
-This performs batched upserts. It does not delete destination records. Re-running is intended to be idempotent for primary-key conflicts, but review the dry run first, especially after production has moved to Supabase.
+The importer upserts in batches and does not delete target rows. Verify counts, IDs, roles, project IDs, timestamps, active shift/break references, and reports after import.
 
-## Important limitations
+## Important limitations and safety
 
-- Authentication records must be imported first; the utility deliberately refuses to invent user ID mappings.
-- Do a write freeze or a documented final delta import during cutover. This script is a collection export/import, not live replication.
-- Review counts, project IDs, roles, and active break states before switching traffic.
-- Never commit .env, service-account files, exported records, database passwords, WhatsApp secrets, or the service-role key.
+- Import Auth users first; the script deliberately does not invent user UUID mappings.
+- A one-time export is not live replication. Use a short write-freeze or a documented final delta import at cutover.
+- Never commit or share `.env`, Firebase service-account files, exported data, database passwords, WhatsApp secrets, or the Supabase service-role key.
+- Never use the Supabase publishable key for the migration utility.
