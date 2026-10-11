@@ -20,7 +20,10 @@ export function useBreakManagement(profile) {
     const proj = (profile?.project || "GENERAL").toUpperCase();
     let genData = {}; let projData = {};
 
-    const updateConfig = () => setConfig(prev => ({ ...prev, ...genData, ...projData }));
+    const updateConfig = () => {
+      const projectOverrides = projData?.extra?.hasSettingsOverride === true ? projData : {};
+      setConfig(prev => ({ ...prev, ...genData, ...projectOverrides }));
+    };
 
     const unsubGen = onSnapshot(doc(db, "project_settings", "GENERAL"), snap => {
        genData = snap.exists() ? snap.data() : {};
