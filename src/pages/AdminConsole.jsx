@@ -378,6 +378,7 @@ function ConfigSettingsCard({ isSuperAdmin, myProject, projectsList }) {
     setBusy(true);
     try {
       await setDoc(doc(db, "project_settings", targetTenant), {
+        ...form,
         shiftDurationHours: Number(form.shiftDurationHours ?? 9),
         mealBreakMin: Number(form.mealBreakMin ?? 40),
         shortBreakMin: Number(form.shortBreakMin ?? 20),
