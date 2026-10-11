@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import { httpsCallable } from "../compat/functions";
-import { auth, db, functions } from "../firebase";
+import { auth, functions } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { useBreakManagement } from "../hooks/useBreakManagement";
 import { useHeartbeat, useOnlineRoster } from "../hooks/usePresence";
