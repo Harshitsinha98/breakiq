@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, doc, onSnapshot, query, setDoc, serverTimestamp, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, query, setDoc, serverTimestamp, where } from "../compat/firestore";
 import { db } from "../firebase";
 
 const HEARTBEAT_MS = 25_000;
