@@ -66,7 +66,7 @@ export function AuthProvider({ children }) {
 
     // Read role from Firestore before writing presence
     // (custom claims may not be set; profile doc is the source of truth)
-    const userSnap = await import("firebase/firestore").then(({ getDoc }) =>
+    const userSnap = await import("../compat/firestore").then(({ getDoc }) =>
       getDoc(doc(db, "users", cred.user.uid))
     );
     const userRole = userSnap.exists() ? userSnap.data().role : "AGENT";
