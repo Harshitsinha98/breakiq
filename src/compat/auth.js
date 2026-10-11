@@ -3,7 +3,7 @@ import { supabase } from "../supabase";
 export function signInWithEmailAndPassword(_auth, email, password) {
   return supabase.auth.signInWithPassword({ email, password }).then(({ data, error }) => {
     if (error) throw error;
-    return { user: data.user, session: data.session };
+    return { user: data.user ? { ...data.user, uid: data.user.id } : null, session: data.session };
   });
 }
 
@@ -16,7 +16,7 @@ export function signOut(_auth) {
 
 export function onAuthStateChanged(_auth, callback) {
   const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-    callback(session?.user ?? null);
+    callback(session?.user ? { ...session.user, uid: session.user.id } : null);
   });
   return () => data.subscription.unsubscribe();
 }
