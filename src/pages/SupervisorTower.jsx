@@ -16,7 +16,7 @@ export default function SupervisorTower() {
 
   const supervisorsOnline = useOnlineRoster("SUPERVISOR");
   const agentsOnline = useOnlineRoster("AGENT");
-  const { settings, agents, activeBreaks, pendingBreaks } = useFloorData();
+  const { settings, agents, activeBreaks, pendingBreaks } = useFloorData(profile);
 
   const [activeTab, setActiveTab] = useState("MONITORING"); 
   const [now, setNow] = useState(Date.now());
