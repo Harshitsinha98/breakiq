@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { collection, doc, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
+import { collection, doc, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "../compat/firestore";
+import { httpsCallable } from "../compat/functions";
 import { auth, db, functions } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { useHeartbeat, useOnlineRoster } from "../hooks/usePresence";
