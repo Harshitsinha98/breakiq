@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
+import { doc, onSnapshot } from "../compat/firestore";
+import { httpsCallable } from "../compat/functions";
 import { db, functions } from "../firebase";
 
 export function useBreakManagement(profile) {
