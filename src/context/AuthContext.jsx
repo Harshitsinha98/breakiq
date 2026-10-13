@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "../compat/auth";
+import { doc, onSnapshot, setDoc, serverTimestamp } from "../compat/firestore";
+import { httpsCallable } from "../compat/functions";
 import { auth, db, functions, ORG_DOMAIN } from "../firebase";
 
 const AuthContext = createContext(null);
@@ -66,7 +66,7 @@ export function AuthProvider({ children }) {
 
     // Read role from Firestore before writing presence
     // (custom claims may not be set; profile doc is the source of truth)
-    const userSnap = await import("firebase/firestore").then(({ getDoc }) =>
+    const userSnap = await import("../compat/firestore").then(({ getDoc }) =>
       getDoc(doc(db, "users", cred.user.uid))
     );
     const userRole = userSnap.exists() ? userSnap.data().role : "AGENT";

@@ -1,0 +1,12 @@
+{
+  "name": "breakiq-migration-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate:firestore": "node migrate-firestore.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
+    "firebase-admin": "^13.5.0"
+  }
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
+import { doc, onSnapshot } from "../compat/firestore";
+import { httpsCallable } from "../compat/functions";
 import { db, functions } from "../firebase";
 
 export function useBreakManagement(profile) {
@@ -20,7 +20,10 @@ export function useBreakManagement(profile) {
     const proj = (profile?.project || "GENERAL").toUpperCase();
     let genData = {}; let projData = {};
 
-    const updateConfig = () => setConfig(prev => ({ ...prev, ...genData, ...projData }));
+    const updateConfig = () => {
+      const projectOverrides = projData?.extra?.hasSettingsOverride === true ? projData : {};
+      setConfig(prev => ({ ...prev, ...genData, ...projectOverrides }));
+    };
 
     const unsubGen = onSnapshot(doc(db, "project_settings", "GENERAL"), snap => {
        genData = snap.exists() ? snap.data() : {};
@@ -59,10 +62,26 @@ export function useBreakManagement(profile) {
 
   useEffect(() => {
     const proj = (profile?.project || "GENERAL").toUpperCase();
-    const unsub = onSnapshot(doc(db, "project_settings", proj), snap => {
-      if (snap.exists() && snap.data()?.emergencyLockout) setWindowStatus({ locked: true, reason: "EMERGENCY_LOCKOUT", message: snap.data().emergencyReason });
-      else setWindowStatus({ locked: false });
-    }); return () => unsub();
+    let generalData = {};
+    let projectData = {};
+    const applyLockState = () => {
+      const locked = Boolean(generalData?.emergencyLockout || projectData?.emergencyLockout);
+      const reason = projectData?.emergencyLockout
+        ? projectData?.emergencyReason
+        : generalData?.emergencyReason;
+      setWindowStatus(locked
+        ? { locked: true, reason: "EMERGENCY_LOCKOUT", message: reason || "Breaks paused by management" }
+        : { locked: false });
+    };
+    const unsubGeneral = onSnapshot(doc(db, "project_settings", "GENERAL"), snap => {
+      generalData = snap.exists() ? snap.data() : {};
+      applyLockState();
+    });
+    const unsubProject = proj === "GENERAL" ? () => {} : onSnapshot(doc(db, "project_settings", proj), snap => {
+      projectData = snap.exists() ? snap.data() : {};
+      applyLockState();
+    });
+    return () => { unsubGeneral(); unsubProject(); };
   }, [profile?.project]);
 
   let isStartLocked = false; let startLockoutMillis = 0; let isEndLocked = false; let endLockoutMillis = 0;

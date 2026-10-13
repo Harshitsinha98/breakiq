@@ -1,18 +1,46 @@
 import { useEffect, useState } from "react";
-import { collection, doc, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, where } from "../compat/firestore";
 import { db } from "../firebase";
 import { DEFAULT_SETTINGS } from "../utils/constants";
 
-export function useFloorData() {
+export function useFloorData(profile) {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [agents, setAgents] = useState([]);
   const [activeBreaks, setActiveBreaks] = useState([]);
   const [pendingBreaks, setPendingBreaks] = useState([]);
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "break_settings", "config"), (s) => setSettings(s.exists() ? { ...DEFAULT_SETTINGS, ...s.data() } : DEFAULT_SETTINGS));
-    return () => unsub();
-  }, []);
+    const project = (profile?.project || "GENERAL").trim().toUpperCase();
+    let generalData = null;
+    let projectData = null;
+
+    const applySettings = () => {
+      const selected = project === "GENERAL"
+        ? generalData
+        : (projectData?.extra?.hasSettingsOverride === true ? projectData : generalData);
+      setSettings({ ...DEFAULT_SETTINGS, ...(selected || {}) });
+    };
+
+    const unsubscribeGeneral = onSnapshot(
+      doc(db, "project_settings", "GENERAL"),
+      (snapshot) => {
+        generalData = snapshot.exists() ? snapshot.data() : null;
+        applySettings();
+      }
+    );
+
+    const unsubscribeProject = project === "GENERAL"
+      ? () => {}
+      : onSnapshot(doc(db, "project_settings", project), (snapshot) => {
+          projectData = snapshot.exists() ? snapshot.data() : null;
+          applySettings();
+        });
+
+    return () => {
+      unsubscribeGeneral();
+      unsubscribeProject();
+    };
+  }, [profile?.project]);
 
   useEffect(() => {
     const q = query(collection(db, "users"), where("role", "==", "AGENT"));

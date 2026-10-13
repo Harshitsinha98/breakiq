@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { collection, doc, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
+import { collection, doc, onSnapshot, setDoc, deleteDoc, serverTimestamp } from "../compat/firestore";
+import { httpsCallable } from "../compat/functions";
 import { auth, db, functions } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import { useHeartbeat, useOnlineRoster } from "../hooks/usePresence";
@@ -347,29 +347,53 @@ function ConfigSettingsCard({ isSuperAdmin, myProject, projectsList }) {
   const [busy, setBusy] = useState(false); 
   const [saved, setSaved] = useState(false);
   
-  useEffect(() => { 
-    const unsub = onSnapshot(doc(db, "project_settings", targetTenant), snap => { 
-      if (snap.exists()) setForm(snap.data()); 
-      else setForm(DEFAULT_SETTINGS); 
-    }); 
-    return () => unsub(); 
+  useEffect(() => {
+    let generalData = null;
+    let tenantData = null;
+    const applyForm = () => {
+      const custom = targetTenant === "GENERAL"
+        ? generalData
+        : (tenantData?.extra?.hasSettingsOverride === true ? tenantData : generalData);
+      setForm({ ...DEFAULT_SETTINGS, ...(custom || {}) });
+    };
+
+    const unsubGeneral = onSnapshot(doc(db, "project_settings", "GENERAL"), snap => {
+      generalData = snap.exists() ? snap.data() : null;
+      applyForm();
+    });
+
+    const unsubTenant = targetTenant === "GENERAL" ? () => {} : onSnapshot(
+      doc(db, "project_settings", targetTenant),
+      snap => {
+        tenantData = snap.exists() ? snap.data() : null;
+        applyForm();
+      }
+    );
+
+    return () => { unsubGeneral(); unsubTenant(); };
   }, [targetTenant]);
-  
-  const handleSaveConfig = async (e) => { 
-    e.preventDefault(); 
-    setBusy(true); 
-    try { 
-      await setDoc(doc(db, "project_settings", targetTenant), { 
-        ...form, 
-        updatedAt: serverTimestamp() 
-      }, { merge: true }); 
-      setSaved(true); 
-      setTimeout(() => setSaved(false), 2500); 
-    } catch (err) { 
-      alert(err.message); 
-    } finally { 
-      setBusy(false); 
-    } 
+
+  const handleSaveConfig = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await setDoc(doc(db, "project_settings", targetTenant), {
+        ...form,
+        shiftDurationHours: Number(form.shiftDurationHours ?? 9),
+        mealBreakMin: Number(form.mealBreakMin ?? 40),
+        shortBreakMin: Number(form.shortBreakMin ?? 20),
+        lockoutStartMin: Number(form.lockoutStartMin ?? 60),
+        lockoutEndMin: Number(form.lockoutEndMin ?? 60),
+        maxConcurrentBreaks: Number(form.maxConcurrentBreaks ?? 2),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (

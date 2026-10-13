@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "../compat/auth";
 import { auth } from "../firebase";
 import { Lock, User, ArrowRight, Loader2, Sparkles, ShieldCheck } from "lucide-react";
 

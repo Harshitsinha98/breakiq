@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
+import { collection, getDocs, query, where, Timestamp } from "../compat/firestore";
 import { db } from "../firebase";
 
 export async function downloadMonthlyBreakReport(year, month) {
