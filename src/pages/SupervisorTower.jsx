@@ -286,11 +286,6 @@ export default function SupervisorTower() {
 
         {activeTab === "PROVISIONING" && <div className="max-w-xl mx-auto"><ProjectLightSpawningCard myProject={myProject} /></div>}
       </main>
-      <footer className="relative z-10 py-8 text-center font-sans">
-        <p className="text-xs font-bold text-slate-400 tracking-wide">
-          Made with <span className="text-rose-500 inline-block animate-pulse">❤️</span> by <strong className="text-slate-600 font-black">Harshit Sinha</strong>
-        </p>
-      </footer>
     </div>
   );
 }
